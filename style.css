@@ -117,16 +117,57 @@ header {
     padding: 4px; font-size: 12px;
 }
 
-.input-row-minimal { display: flex; gap: 10px; }
-.input-row-minimal input {
-    background: #0f172a; border: 1px solid var(--border);
-    border-radius: 10px; padding: 12px; color: white; font-family: inherit; outline: none;
+.input-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
-#daily-total-input { flex: 2; font-size: 18px; font-weight: 700; color: var(--primary); }
-#daily-date-input { flex: 1.2; font-size: 12px; }
+.input-stack input {
+    background: #0f172a;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 15px;
+    color: white;
+    font-family: inherit;
+    outline: none;
+    width: 100%;
+}
 
-#save-daily-btn { background: var(--primary); border: none; color: white; width: 45px; height: 45px; border-radius: 12px; font-size: 24px; cursor: pointer; }
+#daily-total-input {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--primary);
+    text-align: center;
+}
+
+.input-row-sub {
+    display: flex;
+    gap: 10px;
+}
+
+#daily-date-input {
+    flex: 1;
+    font-size: 14px;
+}
+
+#save-daily-btn {
+    flex: 1.5;
+    background: var(--primary);
+    border: none;
+    color: white;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+#save-daily-btn:active { transform: scale(0.95); }
 
 /* Log Items */
 .log-item { background: var(--card-bg); border-radius: 18px; padding: 16px; margin-bottom: 12px; border: 1px solid var(--border); }
