@@ -128,12 +128,16 @@ function setupJournal() {
 
     saveBtn.addEventListener('click', () => {
         const val = parseFloat(document.getElementById('daily-total-input').value);
-        const deposit = parseFloat(document.getElementById('daily-deposit-input').value) || 0;
+        const addVal = parseFloat(document.getElementById('daily-add-input').value) || 0;
+        const subVal = parseFloat(document.getElementById('daily-withdraw-input').value) || 0;
         const date = document.getElementById('daily-date-input').value;
 
         if (!val || !date) return alert("Lütfen miktar ve tarih girin.");
 
-        const entry = { date, value: val, deposit: deposit };
+        // Net Değişim = Eklenen - Çekilen
+        const netChange = addVal - subVal;
+
+        const entry = { date, value: val, deposit: netChange };
         
         const existing = journal.findIndex(j => j.date === date);
         if (existing > -1) journal[existing] = entry;
@@ -144,7 +148,8 @@ function setupJournal() {
         
         renderJournal();
         document.getElementById('daily-total-input').value = '';
-        document.getElementById('daily-deposit-input').value = '';
+        document.getElementById('daily-add-input').value = '';
+        document.getElementById('daily-withdraw-input').value = '';
     });
 
     targetInput.addEventListener('input', () => {

@@ -51,10 +51,13 @@
                 <div class="input-stack">
                     <input type="number" id="daily-total-input" placeholder="Güncel Param (₺)" step="any">
                     <div class="input-row-sub">
-                        <input type="number" id="daily-deposit-input" placeholder="Para Ekle / Çek (+/-)" step="any">
-                        <input type="date" id="daily-date-input">
+                        <input type="number" id="daily-add-input" placeholder="Para Ekle (+)" step="any">
+                        <input type="number" id="daily-withdraw-input" placeholder="Para Çek (-)" step="any">
                     </div>
-                    <button id="save-daily-btn">Kaydı Tamamla <i class="ph-fill ph-check-circle"></i></button>
+                    <div class="input-row-sub">
+                        <input type="date" id="daily-date-input">
+                        <button id="save-daily-btn">Kaydı Tamamla <i class="ph-fill ph-check-circle"></i></button>
+                    </div>
                 </div>
             </div>
 
