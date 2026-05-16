@@ -174,12 +174,19 @@ function renderJournal() {
     const list = document.getElementById('journal-list');
     const summaryContainer = document.getElementById('monthly-summary-container');
     const statusContainer = document.getElementById('working-status-container');
+    const headerTotalElem = document.getElementById('header-total-val');
     
     list.innerHTML = '';
     summaryContainer.innerHTML = '';
     statusContainer.innerHTML = '';
+    if (headerTotalElem) headerTotalElem.innerText = '';
 
     if (journal.length === 0) return;
+
+    // Başlıkta toplam bakiyeyi göster
+    if (headerTotalElem) {
+        headerTotalElem.innerText = formatCurrency(journal[0].value);
+    }
 
     // --- "Para Çalışıyor" Durum Mesajı ---
     const latestDate = new Date(journal[0].date);

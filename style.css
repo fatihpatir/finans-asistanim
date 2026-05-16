@@ -108,6 +108,12 @@ header {
 }
 
 .card-header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+#header-total-val {
+    color: var(--primary);
+    margin-left: 8px;
+    font-size: 16px;
+    font-weight: 700;
+}
 
 .target-setting { text-align: right; }
 .target-setting label { display: block; font-size: 9px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; }
