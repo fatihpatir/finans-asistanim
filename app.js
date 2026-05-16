@@ -12,7 +12,8 @@ const storage = {
 let journal = storage.get('finans_v3_journal', []);
 let portfolio = storage.get('finans_v3_portfolio', {
     fon: { lot: 0, cost: 0, price: 0 },
-    bfren: { lot: 0, cost: 0, price: 0 }
+    bfren: { lot: 0, cost: 0, price: 0 },
+    tarkim: { lot: 0, cost: 0, price: 0 }
 });
 let currentTheme = storage.get('finans_theme', 'theme-blue');
 
@@ -226,7 +227,7 @@ function renderJournal() {
 
 // --- Portfolio Logic ---
 function setupPortfolio() {
-    const inputs = ['p-fon-lot', 'p-fon-cost', 'p-fon-price', 'p-bfren-lot', 'p-bfren-cost', 'p-bfren-price'];
+    const inputs = ['p-fon-lot', 'p-fon-cost', 'p-fon-price', 'p-bfren-lot', 'p-bfren-cost', 'p-bfren-price', 'p-tarkim-lot', 'p-tarkim-cost', 'p-tarkim-price'];
     
     document.getElementById('p-fon-lot').value = portfolio.fon.lot || '';
     document.getElementById('p-fon-cost').value = portfolio.fon.cost || '';
@@ -234,6 +235,9 @@ function setupPortfolio() {
     document.getElementById('p-bfren-lot').value = portfolio.bfren.lot || '';
     document.getElementById('p-bfren-cost').value = portfolio.bfren.cost || '';
     document.getElementById('p-bfren-price').value = portfolio.bfren.price || '';
+    document.getElementById('p-tarkim-lot').value = portfolio.tarkim.lot || '';
+    document.getElementById('p-tarkim-cost').value = portfolio.tarkim.cost || '';
+    document.getElementById('p-tarkim-price').value = portfolio.tarkim.price || '';
 
     inputs.forEach(id => {
         document.getElementById(id).addEventListener('input', () => {
@@ -256,6 +260,11 @@ function updatePortfolioData() {
             lot: parseFloat(document.getElementById('p-bfren-lot').value) || 0,
             cost: parseFloat(document.getElementById('p-bfren-cost').value) || 0,
             price: parseFloat(document.getElementById('p-bfren-price').value) || 0
+        },
+        tarkim: {
+            lot: parseFloat(document.getElementById('p-tarkim-lot').value) || 0,
+            cost: parseFloat(document.getElementById('p-tarkim-cost').value) || 0,
+            price: parseFloat(document.getElementById('p-tarkim-price').value) || 0
         }
     };
     storage.set('finans_v3_portfolio', portfolio);
@@ -264,10 +273,12 @@ function updatePortfolioData() {
 function calculatePortfolio() {
     const fonVal = portfolio.fon.lot * portfolio.fon.price;
     const bfrenVal = portfolio.bfren.lot * portfolio.bfren.price;
-    const total = fonVal + bfrenVal;
+    const tarkimVal = portfolio.tarkim.lot * portfolio.tarkim.price;
+    const total = fonVal + bfrenVal + tarkimVal;
 
     document.getElementById('p-fon-value').innerText = formatCurrency(fonVal);
     document.getElementById('p-bfren-value').innerText = formatCurrency(bfrenVal);
+    document.getElementById('p-tarkim-value').innerText = formatCurrency(tarkimVal);
     document.getElementById('p-total-value').innerText = formatCurrency(total);
 }
 
