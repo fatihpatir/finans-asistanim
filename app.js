@@ -173,10 +173,30 @@ function setupJournal() {
 function renderJournal() {
     const list = document.getElementById('journal-list');
     const summaryContainer = document.getElementById('monthly-summary-container');
+    const statusContainer = document.getElementById('working-status-container');
+    
     list.innerHTML = '';
     summaryContainer.innerHTML = '';
+    statusContainer.innerHTML = '';
 
     if (journal.length === 0) return;
+
+    // --- "Para Çalışıyor" Durum Mesajı ---
+    const latestDate = new Date(journal[0].date);
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    latestDate.setHours(0,0,0,0);
+    
+    const diffDays = Math.floor((today - latestDate) / (1000 * 60 * 60 * 24));
+    
+    if (diffDays > 0) {
+        let msg = `Paranız ${diffDays} gündür çalışmaya devam ediyor... 🚀`;
+        if (today.getDay() === 1) { // Pazartesi ise
+            msg = `Hafta sonu birikimi yansıdı! ${diffDays} günlük kârınızı girebilirsiniz. 💰`;
+        }
+        statusContainer.innerHTML = `<div class="working-badge"><i class="ph-fill ph-lightning"></i> ${msg}</div>`;
+    }
+    // ------------------------------------
 
     const now = new Date();
     const lastMonthEntries = journal.filter(j => {
