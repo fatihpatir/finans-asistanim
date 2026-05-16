@@ -341,15 +341,24 @@ function updatePortfolioData() {
 }
 
 function calculatePortfolio() {
-    const fonVal = portfolio.fon.lot * portfolio.fon.price;
-    const bfrenVal = portfolio.bfren.lot * portfolio.bfren.price;
-    const tarkimVal = portfolio.tarkim.lot * portfolio.tarkim.price;
-    const total = fonVal + bfrenVal + tarkimVal;
+    try {
+        const fonVal = (portfolio.fon.lot || 0) * (portfolio.fon.price || 0);
+        const bfrenVal = (portfolio.bfren.lot || 0) * (portfolio.bfren.price || 0);
+        const tarkimVal = (portfolio.tarkim.lot || 0) * (portfolio.tarkim.price || 0);
+        const total = fonVal + bfrenVal + tarkimVal;
 
-    document.getElementById('p-fon-value').innerText = formatCurrency(fonVal);
-    document.getElementById('p-bfren-value').innerText = formatCurrency(bfrenVal);
-    document.getElementById('p-tarkim-value').innerText = formatCurrency(tarkimVal);
-    document.getElementById('p-total-value').innerText = formatCurrency(total);
+        const fonElem = document.getElementById('p-fon-value');
+        const bfrenElem = document.getElementById('p-bfren-value');
+        const tarkimElem = document.getElementById('p-tarkim-value');
+        const totalElem = document.getElementById('p-total-value');
+
+        if (fonElem) fonElem.innerText = formatCurrency(fonVal);
+        if (bfrenElem) bfrenElem.innerText = formatCurrency(bfrenVal);
+        if (tarkimElem) tarkimElem.innerText = formatCurrency(tarkimVal);
+        if (totalElem) totalElem.innerText = formatCurrency(total);
+    } catch (e) {
+        console.error("Hesaplama hatası:", e);
+    }
 }
 
 // --- Helpers ---

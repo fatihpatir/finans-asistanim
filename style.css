@@ -149,6 +149,9 @@ header {
 #daily-date-input {
     flex: 1;
     font-size: 14px;
+    position: relative;
+    color-scheme: dark;
+    border: 1px solid var(--primary) !important;
 }
 
 #save-daily-btn {

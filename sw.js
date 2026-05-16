@@ -1,4 +1,4 @@
-const CACHE_NAME = 'finans-v2-' + Date.now(); // Her seferinde benzersiz isim
+const CACHE_NAME = 'finans-v3-' + Date.now(); 
 const ASSETS = [
     './',
     './index.html',
