@@ -407,15 +407,38 @@ function setupPortfolio() {
         });
     });
 
-    const savePortBtn = document.getElementById('save-portfolio-btn');
     if (savePortBtn) {
         savePortBtn.onclick = () => {
             updatePortfolioData();
-            calculatePortfolio();
-            savePortBtn.innerHTML = '<i class="ph-fill ph-check-circle"></i> Başarıyla Kaydedildi';
+            const totalVal = calculatePortfolio();
+            
+            // Günlük deftere otomatik ekle
+            const today = new Date().toISOString().split('T')[0];
+            const existingIdx = journal.findIndex(j => j.date === today);
+            
+            const entry = {
+                date: today,
+                value: totalVal,
+                deposit: existingIdx > -1 ? journal[existingIdx].deposit : 0,
+                added: existingIdx > -1 ? journal[existingIdx].added : 0,
+                withdrawn: existingIdx > -1 ? journal[existingIdx].withdrawn : 0
+            };
+            
+            if (existingIdx > -1) {
+                journal[existingIdx] = entry;
+            } else {
+                journal.unshift(entry);
+                journal.sort((a, b) => new Date(b.date) - new Date(a.date));
+            }
+            
+            storage.set('finans_v3_journal', journal);
+            renderJournal();
+            renderMonthlyStats();
+
+            savePortBtn.innerHTML = '<i class="ph-fill ph-check-circle"></i> Portföy & Defter Güncellendi';
             setTimeout(() => {
                 savePortBtn.innerHTML = '<i class="ph-fill ph-floppy-disk"></i> Portföyü Kaydet ve Hesapla';
-            }, 2000);
+            }, 2500);
         };
     }
 
@@ -542,8 +565,10 @@ function calculatePortfolio() {
         }
 
         if (totalElem) totalElem.innerText = formatCurrency(total);
+        return total;
     } catch (e) {
         console.error("Hesaplama hatası:", e);
+        return 0;
     }
 }
 
