@@ -384,6 +384,11 @@ function formatDate(dateStr) {
 
 function registerServiceWorker() {
     if ('serviceWorker' in navigator) {
+        // Yeni bir SW devreye girdiğinde sayfayı otomatik yenile
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            window.location.reload();
+        });
+
         navigator.serviceWorker.register('./sw.js').then(reg => {
             reg.onupdatefound = () => {
                 const installingWorker = reg.installing;
