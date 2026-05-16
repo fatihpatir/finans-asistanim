@@ -68,14 +68,22 @@ let deferredPrompt;
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
 function setupPWA() {
+    const installBtn = document.getElementById('install-btn');
+    const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+
+    // Eğer zaten yüklüyse veya ana ekrandan açıldıysa butonu gizle
+    if (isStandalone) {
+        if (installBtn) installBtn.classList.add('hidden');
+        return;
+    }
+
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
-        const installBtn = document.getElementById('install-btn');
         if (installBtn) installBtn.classList.remove('hidden');
     });
 
-    const installBtn = document.getElementById('install-btn');
+    // iOS için rehber butonunu göster (iOS'ta beforeinstallprompt yoktur)
     if (isIOS && installBtn) {
         installBtn.classList.remove('hidden');
     }
