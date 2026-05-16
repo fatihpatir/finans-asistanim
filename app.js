@@ -241,6 +241,16 @@ function renderJournal() {
             const targetGain = (prev * (TARGET_DAILY_RATE / 100)) * dayGap;
             const isAboveTarget = actualProfit >= targetGain;
 
+            // Hafta sonu ise ve getiri yoksa "HAFTA SONU" yaz, "DÜŞÜK" deme
+            const isWeekend = dateCurrent.getDay() === 0 || dateCurrent.getDay() === 6;
+            let statusText = isAboveTarget ? 'HEDEF ÜSTÜ' : 'HEDEF ALTI';
+            let statusClass = isAboveTarget ? 'success' : 'fail';
+
+            if (actualProfit === 0 && isWeekend) {
+                statusText = 'HAFTA SONU';
+                statusClass = 'weekend';
+            }
+
             diffHTML = `
                 <div class="diff-box ${isGain ? 'gain' : 'loss'}">
                     ${isGain ? '+' : ''}${formatCurrency(actualProfit)} (${isGain ? '+' : ''}${percentDiff}%)
@@ -249,8 +259,8 @@ function renderJournal() {
             `;
             
             targetHTML = `
-                <div class="target-box ${isAboveTarget ? 'success' : 'fail'}">
-                    ${dayGap > 1 ? dayGap + ' Günlük ' : ''}Hedef: ${formatCurrency(targetGain)} | <span class="status">${isAboveTarget ? 'BAŞARILI' : 'DÜŞÜK'}</span>
+                <div class="target-box ${statusClass}">
+                    ${dayGap > 1 ? dayGap + ' Günlük ' : ''}Hedef: ${formatCurrency(targetGain)} | <span class="status">${statusText}</span>
                 </div>
             `;
         }

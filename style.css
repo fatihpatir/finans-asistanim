@@ -233,6 +233,8 @@ header {
 .target-box .status { font-weight: 700; }
 .target-box.success .status { color: var(--success); }
 .target-box.fail .status { color: var(--warning); }
+.target-box.weekend .status { color: var(--text-muted); }
+.target-box.weekend { border-color: rgba(255,255,255,0.05); background: rgba(255,255,255,0.02); }
 
 /* Portfolio Details */
 .portfolio-card { background: var(--card-bg); padding: 20px; border-radius: 18px; margin-bottom: 15px; border: 1px solid var(--border); }
