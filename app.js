@@ -128,11 +128,12 @@ function setupJournal() {
 
     saveBtn.addEventListener('click', () => {
         const val = parseFloat(document.getElementById('daily-total-input').value);
+        const deposit = parseFloat(document.getElementById('daily-deposit-input').value) || 0;
         const date = document.getElementById('daily-date-input').value;
 
         if (!val || !date) return alert("Lütfen miktar ve tarih girin.");
 
-        const entry = { date, value: val };
+        const entry = { date, value: val, deposit: deposit };
         
         const existing = journal.findIndex(j => j.date === date);
         if (existing > -1) journal[existing] = entry;
@@ -143,6 +144,7 @@ function setupJournal() {
         
         renderJournal();
         document.getElementById('daily-total-input').value = '';
+        document.getElementById('daily-deposit-input').value = '';
     });
 
     targetInput.addEventListener('input', () => {
@@ -196,21 +198,30 @@ function renderJournal() {
         if (index < journal.length - 1) {
             const prevEntry = journal[index + 1];
             const prev = prevEntry.value;
-            const diff = entry.value - prev;
-            const isGain = diff >= 0;
-            const percentDiff = ((diff / prev) * 100).toFixed(2);
+            
+            // Gerçek Kâr = (Bugünkü Bakiye - Dünkü Bakiye) - Bugün Yatırılan Ek Para
+            const rawDiff = entry.value - prev;
+            const actualProfit = rawDiff - (entry.deposit || 0);
+            
+            const isGain = actualProfit >= 0;
+            const percentDiff = ((actualProfit / prev) * 100).toFixed(2);
 
-            // İki kayıt arasındaki gün farkını hesapla (Hafta sonu veya ara verme durumları için)
+            // İki kayıt arasındaki gün farkı
             const dateCurrent = new Date(entry.date);
             const datePrev = new Date(prevEntry.date);
             const timeDiff = Math.abs(dateCurrent - datePrev);
             const dayGap = Math.ceil(timeDiff / (1000 * 60 * 60 * 24)) || 1;
 
-            // Günlük hedefi gün sayısıyla çarp (Örn: Hafta sonu ise 3 günlük hedef)
+            // Hedef hesaplama
             const targetGain = (prev * (TARGET_DAILY_RATE / 100)) * dayGap;
-            const isAboveTarget = diff >= targetGain;
+            const isAboveTarget = actualProfit >= targetGain;
 
-            diffHTML = `<div class="diff-box ${isGain ? 'gain' : 'loss'}">${isGain ? '+' : ''}${formatCurrency(diff)} (${isGain ? '+' : ''}${percentDiff}%)</div>`;
+            diffHTML = `
+                <div class="diff-box ${isGain ? 'gain' : 'loss'}">
+                    ${isGain ? '+' : ''}${formatCurrency(actualProfit)} (${isGain ? '+' : ''}${percentDiff}%)
+                    ${entry.deposit ? `<br><small style="color:var(--text-muted); font-size:9px">Ek Yatırım: ${formatCurrency(entry.deposit)}</small>` : ''}
+                </div>
+            `;
             
             targetHTML = `
                 <div class="target-box ${isAboveTarget ? 'success' : 'fail'}">
