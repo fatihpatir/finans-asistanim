@@ -230,8 +230,23 @@ header {
 
 /* Log Main */
 .log-main { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.log-info { display: flex; flex-direction: column; gap: 2px; }
 .log-date { font-size: 13px; font-weight: 600; color: var(--text-muted); }
 .log-val { font-size: 16px; font-weight: 700; }
+
+.log-actions { display: flex; gap: 8px; }
+.action-btn {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    width: 34px; height: 34px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.2s ease;
+    font-size: 16px;
+}
+.action-btn.edit:hover { background: rgba(56, 189, 248, 0.1); color: var(--primary); border-color: var(--primary); }
+.action-btn.delete:hover { background: rgba(239, 68, 68, 0.1); color: var(--danger); border-color: var(--danger); }
+
 .log-stats { display: flex; justify-content: space-between; font-size: 11px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.03); }
 .diff-box.gain { color: var(--success); }
 .diff-box.loss { color: var(--danger); }

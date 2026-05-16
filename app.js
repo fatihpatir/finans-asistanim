@@ -291,8 +291,14 @@ function renderJournal() {
         div.className = 'log-item';
         div.innerHTML = `
             <div class="log-main">
-                <span class="log-date">${formatDate(entry.date)}</span>
-                <span class="log-val">${formatCurrency(entry.value)}</span>
+                <div class="log-info">
+                    <span class="log-date">${formatDate(entry.date)}</span>
+                    <span class="log-val">${formatCurrency(entry.value)}</span>
+                </div>
+                <div class="log-actions">
+                    <button class="action-btn edit" onclick="editEntry('${entry.date}')"><i class="ph ph-pencil-simple"></i></button>
+                    <button class="action-btn delete" onclick="deleteEntry('${entry.date}')"><i class="ph ph-trash"></i></button>
+                </div>
             </div>
             <div class="log-stats">
                 ${diffHTML}
@@ -302,6 +308,27 @@ function renderJournal() {
         list.appendChild(div);
     });
 }
+
+window.editEntry = (date) => {
+    const entry = journal.find(j => j.date === date);
+    if (!entry) return;
+
+    document.getElementById('daily-total-input').value = entry.value;
+    document.getElementById('daily-add-input').value = entry.added || (entry.deposit > 0 ? entry.deposit : '');
+    document.getElementById('daily-withdraw-input').value = entry.withdrawn || (entry.deposit < 0 ? Math.abs(entry.deposit) : '');
+    document.getElementById('daily-date-input').value = entry.date;
+    
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+window.deleteEntry = (date) => {
+    if (!confirm("Bu kaydı silmek istediğinize emin misiniz?")) return;
+    
+    journal = journal.filter(j => j.date !== date);
+    storage.set('finans_v3_journal', journal);
+    renderJournal();
+    renderMonthlyStats();
+};
 
 function renderMonthlyStats() {
     const list = document.getElementById('monthly-stats-list');
