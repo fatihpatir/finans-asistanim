@@ -183,19 +183,27 @@ function renderJournal() {
         let targetHTML = '';
 
         if (index < journal.length - 1) {
-            const prev = journal[index + 1].value;
+            const prevEntry = journal[index + 1];
+            const prev = prevEntry.value;
             const diff = entry.value - prev;
             const isGain = diff >= 0;
             const percentDiff = ((diff / prev) * 100).toFixed(2);
 
-            const targetGain = prev * (TARGET_DAILY_RATE / 100);
+            // İki kayıt arasındaki gün farkını hesapla (Hafta sonu veya ara verme durumları için)
+            const dateCurrent = new Date(entry.date);
+            const datePrev = new Date(prevEntry.date);
+            const timeDiff = Math.abs(dateCurrent - datePrev);
+            const dayGap = Math.ceil(timeDiff / (1000 * 60 * 60 * 24)) || 1;
+
+            // Günlük hedefi gün sayısıyla çarp (Örn: Hafta sonu ise 3 günlük hedef)
+            const targetGain = (prev * (TARGET_DAILY_RATE / 100)) * dayGap;
             const isAboveTarget = diff >= targetGain;
 
             diffHTML = `<div class="diff-box ${isGain ? 'gain' : 'loss'}">${isGain ? '+' : ''}${formatCurrency(diff)} (${isGain ? '+' : ''}${percentDiff}%)</div>`;
             
             targetHTML = `
                 <div class="target-box ${isAboveTarget ? 'success' : 'fail'}">
-                    Hedef: ${formatCurrency(targetGain)} | Durum: <span class="status">${isAboveTarget ? 'BAŞARILI' : 'DÜŞÜK'}</span>
+                    ${dayGap > 1 ? dayGap + ' Günlük ' : ''}Hedef: ${formatCurrency(targetGain)} | <span class="status">${isAboveTarget ? 'BAŞARILI' : 'DÜŞÜK'}</span>
                 </div>
             `;
         }
