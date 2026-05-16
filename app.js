@@ -190,9 +190,9 @@ function renderJournal() {
     const diffDays = Math.floor((today - latestDate) / (1000 * 60 * 60 * 24));
     
     if (diffDays > 0) {
-        let msg = `Paranız ${diffDays} gündür çalışmaya devam ediyor... 🚀`;
+        let msg = `Paranız Çalışıyor 🚀`;
         if (today.getDay() === 1) { // Pazartesi ise
-            msg = `Hafta sonu birikimi yansıdı! ${diffDays} günlük kârınızı girebilirsiniz. 💰`;
+            msg = `Hafta Sonu Getirisi Hazır 💰`;
         }
         statusContainer.innerHTML = `<div class="working-badge"><i class="ph-fill ph-lightning"></i> ${msg}</div>`;
     }
