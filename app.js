@@ -14,22 +14,40 @@ let portfolio = storage.get('finans_v3_portfolio', {
     fon: { lot: 0, cost: 0, price: 0 },
     bfren: { lot: 0, cost: 0, price: 0 }
 });
+let currentTheme = storage.get('finans_theme', 'theme-blue');
 
 // Varsayılan günlük hedef %0.10
 let TARGET_DAILY_RATE = storage.get('finans_v3_target_rate', 0.10);
 
 // --- Init ---
 function init() {
+    applyTheme(currentTheme);
     setupNavigation();
     setupJournal();
     setupPortfolio();
+    setupPWA();
     
     // Set default values
     document.getElementById('daily-date-input').value = new Date().toISOString().split('T')[0];
     document.getElementById('target-rate-input').value = TARGET_DAILY_RATE;
     
     renderJournal();
+
+    // Theme toggle
+    document.getElementById('theme-toggle').onclick = () => {
+        document.getElementById('theme-menu').classList.toggle('hidden');
+    };
 }
+
+function applyTheme(theme) {
+    document.body.className = `dark-theme ${theme}`;
+    storage.set('finans_theme', theme);
+}
+
+window.setTheme = (theme) => {
+    applyTheme(theme);
+    document.getElementById('theme-menu').classList.add('hidden');
+};
 
 function setupNavigation() {
     document.querySelectorAll('.nav-item').forEach(item => {
@@ -42,6 +60,54 @@ function setupNavigation() {
             document.getElementById(`${tab}-page`).classList.remove('hidden');
         });
     });
+}
+
+// --- PWA Installation ---
+let deferredPrompt;
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+function setupPWA() {
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        const installBtn = document.getElementById('install-btn');
+        if (installBtn) installBtn.classList.remove('hidden');
+    });
+
+    const installBtn = document.getElementById('install-btn');
+    if (isIOS && installBtn) {
+        installBtn.classList.remove('hidden');
+    }
+
+    if (installBtn) {
+        installBtn.onclick = () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choice) => {
+                    if (choice.outcome === 'accepted') installBtn.classList.add('hidden');
+                    deferredPrompt = null;
+                });
+            } else if (isIOS) {
+                showIOSGuide();
+            }
+        };
+    }
+}
+
+function showIOSGuide() {
+    const modal = document.getElementById('modal-container');
+    const modalBody = document.getElementById('modal-body');
+    modalBody.innerHTML = `
+        <div class="ios-guide">
+            <i class="ph ph-device-mobile-speaker" style="font-size:48px; color:var(--primary); margin-bottom:15px"></i>
+            <h2>Ana Ekrana Ekle</h2>
+            <p>Bu uygulamayı telefonunuza yüklemek için:</p>
+            <div class="step"><div class="num">1</div><p>Tarayıcı altındaki <strong>Paylaş <i class="ph ph-export"></i></strong> butonuna dokunun.</p></div>
+            <div class="step"><div class="num">2</div><p>Menüyü aşağı kaydırıp <strong>Ana Ekrana Ekle <i class="ph ph-plus-square"></i></strong> seçeneğini seçin.</p></div>
+            <button class="btn-submit" onclick="document.getElementById('modal-container').classList.add('hidden')" style="margin-top:20px; padding:12px">Anladım</button>
+        </div>
+    `;
+    modal.classList.remove('hidden');
 }
 
 // --- Journal Logic ---
@@ -71,7 +137,7 @@ function setupJournal() {
     targetInput.addEventListener('input', () => {
         TARGET_DAILY_RATE = parseFloat(targetInput.value) || 0;
         storage.set('finans_v3_target_rate', TARGET_DAILY_RATE);
-        renderJournal(); // Re-render with new target
+        renderJournal();
     });
 
     document.getElementById('global-reset-btn').onclick = () => {
@@ -79,6 +145,10 @@ function setupJournal() {
             localStorage.clear();
             location.reload();
         }
+    };
+    
+    document.getElementById('close-modal').onclick = () => {
+        document.getElementById('modal-container').classList.add('hidden');
     };
 }
 
@@ -90,9 +160,7 @@ function renderJournal() {
 
     if (journal.length === 0) return;
 
-    // Monthly Summary Check
     const now = new Date();
-    const firstOfCurrent = new Date(now.getFullYear(), now.getMonth(), 1);
     const lastMonthEntries = journal.filter(j => {
         const d = new Date(j.date);
         return d.getMonth() === (now.getMonth() - 1 === -1 ? 11 : now.getMonth() - 1);
@@ -118,11 +186,10 @@ function renderJournal() {
             const prev = journal[index + 1].value;
             const diff = entry.value - prev;
             const isGain = diff >= 0;
+            const percentDiff = ((diff / prev) * 100).toFixed(2);
 
-            // Günlük hedef hesaplama (Kullanıcının girdiği % üzerinden)
             const targetGain = prev * (TARGET_DAILY_RATE / 100);
             const isAboveTarget = diff >= targetGain;
-            const percentDiff = ((diff / prev) * 100).toFixed(2);
 
             diffHTML = `<div class="diff-box ${isGain ? 'gain' : 'loss'}">${isGain ? '+' : ''}${formatCurrency(diff)} (${isGain ? '+' : ''}${percentDiff}%)</div>`;
             
@@ -153,7 +220,6 @@ function renderJournal() {
 function setupPortfolio() {
     const inputs = ['p-fon-lot', 'p-fon-cost', 'p-fon-price', 'p-bfren-lot', 'p-bfren-cost', 'p-bfren-price'];
     
-    // Load saved
     document.getElementById('p-fon-lot').value = portfolio.fon.lot || '';
     document.getElementById('p-fon-cost').value = portfolio.fon.cost || '';
     document.getElementById('p-fon-price').value = portfolio.fon.price || '';
@@ -207,4 +273,11 @@ function formatDate(dateStr) {
     return new Date(dateStr).toLocaleDateString('tr-TR', options);
 }
 
+function registerServiceWorker() {
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js').then(() => console.log('SW Registered')).catch(err => console.log('SW Failed', err));
+    }
+}
+
 init();
+registerServiceWorker();

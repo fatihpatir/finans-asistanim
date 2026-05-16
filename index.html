@@ -12,9 +12,26 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
-<body class="dark-theme">
+<body class="dark-theme theme-blue">
     <div id="app">
         
+        <header>
+            <div class="header-top-row">
+                <h1>Finans Günlüğüm</h1>
+                <div class="header-btns">
+                    <button id="install-btn" class="icon-btn-small hidden"><i class="ph ph-download-simple"></i></button>
+                    <button id="theme-toggle" class="icon-btn-small"><i class="ph ph-palette"></i></button>
+                </div>
+            </div>
+            
+            <div id="theme-menu" class="theme-menu hidden">
+                <button class="theme-opt blue" onclick="setTheme('theme-blue')"></button>
+                <button class="theme-opt emerald" onclick="setTheme('theme-emerald')"></button>
+                <button class="theme-opt rose" onclick="setTheme('theme-rose')"></button>
+                <button class="theme-opt amber" onclick="setTheme('theme-amber')"></button>
+            </div>
+        </header>
+
         <!-- Tab Navigation -->
         <nav class="top-nav">
             <button class="nav-item active" data-tab="journal">Günlük Defter</button>
@@ -27,8 +44,8 @@
                 <div class="card-header-flex">
                     <h3>Bugünkü Toplam Bakiye</h3>
                     <div class="target-setting">
-                        <label>Aylık Hedef %</label>
-                        <input type="number" id="target-rate-input" value="10" step="0.1">
+                        <label>Günlük Hedef %</label>
+                        <input type="number" id="target-rate-input" value="0.10" step="0.01">
                     </div>
                 </div>
                 <div class="input-row-minimal">
@@ -40,9 +57,7 @@
 
             <div id="monthly-summary-container"></div>
 
-            <div id="journal-list">
-                <!-- Daily logs with diff and target comparisons -->
-            </div>
+            <div id="journal-list"></div>
         </div>
 
         <!-- Page 2: Portfolio Details -->
@@ -96,13 +111,23 @@
                 <strong id="p-total-value">₺0.00</strong>
             </div>
             
-            <p style="font-size:11px; color:var(--text-muted); text-align:center; margin-top:10px">
-                * Buradaki bilgiler sadece referans içindir, günlük defteri etkilemez.
-            </p>
+            <button id="global-reset-btn">Verileri Sıfırla</button>
         </div>
 
-        <button id="global-reset-btn">Verileri Sıfırla</button>
+        <footer class="app-footer">
+            <a href="https://fatihpatir.github.io/web" target="_blank">
+                <i class="ph ph-code"></i> Fatih PATIR tarafından geliştirildi
+            </a>
+        </footer>
 
+    </div>
+
+    <!-- Modals -->
+    <div id="modal-container" class="hidden">
+        <div class="modal-content">
+            <button id="close-modal"><i class="ph ph-x"></i></button>
+            <div id="modal-body"></div>
+        </div>
     </div>
 
     <script src="app.js"></script>
