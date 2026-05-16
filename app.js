@@ -35,6 +35,7 @@ function init() {
     document.getElementById('target-rate-input').value = TARGET_DAILY_RATE;
     
     renderJournal();
+    renderMonthlyStats();
 
     // Theme toggle
     document.getElementById('theme-toggle').onclick = () => {
@@ -61,6 +62,10 @@ function setupNavigation() {
             
             document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
             document.getElementById(`${tab}-page`).classList.remove('hidden');
+
+            if (tab === 'stats') {
+                renderMonthlyStats();
+            }
         });
     });
 }
@@ -137,7 +142,16 @@ function setupJournal() {
         // Net Değişim = Eklenen - Çekilen
         const netChange = addVal - subVal;
 
-        const entry = { date, value: val, deposit: netChange };
+        // Eklenen ve Çekilen değerleri ayrı ayrı saklamak istersek objeyi genişletebiliriz
+        // Ancak şu anki yapıda deposit olarak netChange saklanıyor.
+        // Kullanıcının istediği "bu ay şu kadar eklendi" için addVal ve subVal'ı ayrı saklamak daha iyi olur.
+        const entry = { 
+            date, 
+            value: val, 
+            deposit: netChange,
+            added: addVal,
+            withdrawn: subVal
+        };
         
         const existing = journal.findIndex(j => j.date === date);
         if (existing > -1) journal[existing] = entry;
@@ -147,6 +161,7 @@ function setupJournal() {
         storage.set('finans_v3_journal', journal);
         
         renderJournal();
+        renderMonthlyStats();
         document.getElementById('daily-total-input').value = '';
         document.getElementById('daily-add-input').value = '';
         document.getElementById('daily-withdraw-input').value = '';
@@ -261,7 +276,7 @@ function renderJournal() {
             diffHTML = `
                 <div class="diff-box ${isGain ? 'gain' : 'loss'}">
                     ${isGain ? '+' : ''}${formatCurrency(actualProfit)} (${isGain ? '+' : ''}${percentDiff}%)
-                    ${entry.deposit ? `<br><small style="color:var(--text-muted); font-size:9px">Ek Yatırım: ${formatCurrency(entry.deposit)}</small>` : ''}
+                    ${entry.deposit ? `<br><small style="color:var(--text-muted); font-size:9px">Net Değişim: ${formatCurrency(entry.deposit)}</small>` : ''}
                 </div>
             `;
             
@@ -285,6 +300,89 @@ function renderJournal() {
             </div>
         `;
         list.appendChild(div);
+    });
+}
+
+function renderMonthlyStats() {
+    const list = document.getElementById('monthly-stats-list');
+    if (!list) return;
+    list.innerHTML = '';
+
+    if (journal.length === 0) {
+        list.innerHTML = '<p style="text-align:center; color:var(--text-muted); margin-top:20px;">Henüz kayıt yok.</p>';
+        return;
+    }
+
+    // Aylara göre grupla
+    const months = {};
+    
+    // Journal zaten tarihe göre sıralı (en yeni en üstte)
+    journal.forEach((entry, index) => {
+        const date = new Date(entry.date);
+        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        
+        if (!months[monthKey]) {
+            months[monthKey] = {
+                label: date.toLocaleDateString('tr-TR', { year: 'numeric', month: 'long' }),
+                added: 0,
+                withdrawn: 0,
+                profit: 0,
+                startValue: entry.value,
+                endValue: entry.value
+            };
+        }
+
+        // Aylık toplam ekleme ve çekme (yeni kayıt sistemine göre entry.added ve entry.withdrawn var, eskilerde yok)
+        months[monthKey].added += entry.added || (entry.deposit > 0 ? entry.deposit : 0);
+        months[monthKey].withdrawn += entry.withdrawn || (entry.deposit < 0 ? Math.abs(entry.deposit) : 0);
+        
+        // Kar hesaplama için verileri topla
+        if (index < journal.length - 1) {
+            const nextEntry = journal[index + 1];
+            // Eğer nextEntry aynı aydaysa veya farklı aydaysa bile kar hesapla
+            // Bu entry'deki kâr: (entry.value - nextEntry.value) - entry.deposit
+            const entryProfit = (entry.value - nextEntry.value) - (entry.deposit || 0);
+            
+            // Sadece bu entry o aya aitse kârı o aya ekle
+            months[monthKey].profit += entryProfit;
+        }
+
+        // Ayın sonundaki ve başındaki değerleri güncelle (Journal tersten sıralı)
+        // months[monthKey].endValue her zaman ilk karşılaşılan entry (en yeni)
+        // months[monthKey].startValue her zaman son karşılaşılan entry (en eski)
+        if (index === journal.findIndex(j => j.date === entry.date)) {
+             // Bu ilk karşılaştığımız mı? Evet endValue kalsın.
+        }
+        months[monthKey].startValue = entry.value;
+    });
+
+    Object.keys(months).forEach(key => {
+        const m = months[key];
+        const card = document.createElement('div');
+        card.className = 'stat-card';
+        card.innerHTML = `
+            <span class="stat-month">${m.label}</span>
+            <div class="stat-grid">
+                <div class="stat-item">
+                    <span class="stat-label">Toplam Eklenen</span>
+                    <span class="stat-value plus">+${formatCurrency(m.added)}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Toplam Bozulan</span>
+                    <span class="stat-value minus">-${formatCurrency(m.withdrawn)}</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-label">Ay Sonu Bakiye</span>
+                    <span class="stat-value">${formatCurrency(m.endValue)}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Aylık Net Kâr</span>
+                    <span class="stat-value ${m.profit >= 0 ? 'plus' : 'minus'}">${m.profit >= 0 ? '+' : ''}${formatCurrency(m.profit)}</span>
+                </div>
+            </div>
+        `;
+        list.appendChild(card);
     });
 }
 
