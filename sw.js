@@ -1,4 +1,4 @@
-const CACHE_NAME = 'finans-v5-' + Date.now(); 
+const CACHE_NAME = 'finans-v6-' + Date.now(); 
 const ASSETS = [
     './',
     './index.html',
