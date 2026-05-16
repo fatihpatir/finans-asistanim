@@ -10,11 +10,13 @@ const storage = {
 
 // --- State ---
 let journal = storage.get('finans_v3_journal', []);
-let portfolio = storage.get('finans_v3_portfolio', {
+const defaultPortfolio = {
     fon: { lot: 0, cost: 0, price: 0 },
     bfren: { lot: 0, cost: 0, price: 0 },
     tarkim: { lot: 0, cost: 0, price: 0 }
-});
+};
+let savedPortfolio = storage.get('finans_v3_portfolio', defaultPortfolio);
+let portfolio = { ...defaultPortfolio, ...savedPortfolio };
 let currentTheme = storage.get('finans_theme', 'theme-blue');
 
 // Varsayılan günlük hedef %0.10
