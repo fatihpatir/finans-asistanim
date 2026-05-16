@@ -171,6 +171,32 @@ header {
 
 /* Log Items */
 .log-item { background: var(--card-bg); border-radius: 18px; padding: 16px; margin-bottom: 12px; border: 1px solid var(--border); }
+
+/* Portfolio Actions */
+.port-actions {
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.btn-secondary-small {
+    background: rgba(56, 189, 248, 0.1);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    color: var(--primary);
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary-small:active { transform: scale(0.95); background: rgba(56, 189, 248, 0.2); }
+.btn-secondary-small i { font-size: 16px; }
+
+/* Log Main */
 .log-main { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .log-date { font-size: 13px; font-weight: 600; color: var(--text-muted); }
 .log-val { font-size: 16px; font-weight: 700; }

@@ -255,6 +255,66 @@ function setupPortfolio() {
     });
 
     calculatePortfolio();
+
+    const fetchBtn = document.getElementById('fetch-prices-btn');
+    if (fetchBtn) {
+        fetchBtn.addEventListener('click', fetchPrices);
+    }
+}
+
+async function fetchPrices() {
+    const btn = document.getElementById('fetch-prices-btn');
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = '<i class="ph ph-circle-notch ph-spin"></i> Güncelleniyor...';
+    btn.disabled = true;
+
+    try {
+        // Yahoo Finance API (BIST hisseleri için .IS uzantısı kullanılır)
+        const symbols = ['BFREN.IS', 'TARKM.IS'];
+        const proxy = "https://api.allorigins.win/get?url=";
+        
+        // Hisseleri Güncelle
+        for (const symbol of symbols) {
+            const url = encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1m&range=1d`);
+            const response = await fetch(`${proxy}${url}`);
+            const data = await response.json();
+            const contents = JSON.parse(data.contents);
+            const price = contents.chart.result[0].meta.regularMarketPrice;
+
+            if (symbol === 'BFREN.IS') {
+                document.getElementById('p-bfren-price').value = price;
+            } else if (symbol === 'TARKM.IS') {
+                document.getElementById('p-tarkim-price').value = price;
+            }
+        }
+
+        // Fon Güncelleme (YK2 - Yapı Kredi Para Piyasası Fonu)
+        // Not: Fon verileri için Yahoo kısıtlıdır, örnek bir kaynaktan çekmeyi deniyoruz.
+        // Eğer fon çekilemezse mevcut değer kalır.
+        try {
+            const fonUrl = encodeURIComponent(`https://fiyatlar.org/fonlar/yk2`);
+            const fonRes = await fetch(`${proxy}${fonUrl}`);
+            const fonData = await fonRes.json();
+            // Basit bir regex ile fiyatı ayıklıyoruz (Scraping)
+            const match = fonData.contents.match(/<span class="fiyat">([0-9,.]+)<\/span>/);
+            if (match) {
+                const fonPrice = parseFloat(match[1].replace(',', '.'));
+                document.getElementById('p-fon-price').value = fonPrice;
+            }
+        } catch (e) { console.log("Fon fiyatı çekilemedi, eski değer korunuyor."); }
+
+        updatePortfolioData();
+        calculatePortfolio();
+        
+        btn.innerHTML = '<i class="ph ph-check"></i> Güncellendi';
+        setTimeout(() => { btn.innerHTML = originalHTML; btn.disabled = false; }, 2000);
+
+    } catch (error) {
+        console.error("Fiyat çekme hatası:", error);
+        btn.innerHTML = '<i class="ph ph-warning"></i> Hata Oluştu';
+        setTimeout(() => { btn.innerHTML = originalHTML; btn.disabled = false; }, 2000);
+        alert("Fiyatlar otomatik çekilemedi. Lütfen manuel giriniz veya internetinizi kontrol edin.");
+    }
 }
 
 function updatePortfolioData() {
