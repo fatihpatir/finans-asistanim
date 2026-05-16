@@ -362,7 +362,16 @@ function formatDate(dateStr) {
 
 function registerServiceWorker() {
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js').then(() => console.log('SW Registered')).catch(err => console.log('SW Failed', err));
+        navigator.serviceWorker.register('./sw.js').then(reg => {
+            reg.onupdatefound = () => {
+                const installingWorker = reg.installing;
+                installingWorker.onstatechange = () => {
+                    if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                        console.log('Yeni güncelleme hazır, bir sonraki açılışta aktif olacak.');
+                    }
+                };
+            };
+        }).catch(err => console.log('SW Failed', err));
     }
 }
 

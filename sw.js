@@ -1,16 +1,16 @@
-const CACHE_NAME = 'finans-v1';
+const CACHE_NAME = 'finans-v2-' + Date.now(); // Her seferinde benzersiz isim
 const ASSETS = [
     './',
     './index.html',
     './style.css',
     './app.js',
     './manifest.json',
-    'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700&display=swap',
-    'https://unpkg.com/@phosphor-icons/web',
-    'https://cdn.jsdelivr.net/npm/chart.js'
+    './icon.png'
 ];
 
+// Kurulumda dosyaları önbelleğe al
 self.addEventListener('install', (event) => {
+    self.skipWaiting(); // Beklemeden yeni sürüme geç
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
             return cache.addAll(ASSETS);
@@ -18,10 +18,26 @@ self.addEventListener('install', (event) => {
     );
 });
 
+// Eski önbellekleri temizle
+self.addEventListener('activate', (event) => {
+    event.waitUntil(
+        caches.keys().then((cacheNames) => {
+            return Promise.all(
+                cacheNames.map((cacheName) => {
+                    if (cacheName !== CACHE_NAME) {
+                        return caches.delete(cacheName);
+                    }
+                })
+            );
+        }).then(() => self.clients.claim())
+    );
+});
+
+// Ağ öncelikli strateji (Önce internete bak, yoksa önbelleği kullan)
 self.addEventListener('fetch', (event) => {
     event.respondWith(
-        caches.match(event.request).then((response) => {
-            return response || fetch(event.request);
+        fetch(event.request).catch(() => {
+            return caches.match(event.request);
         })
     );
 });
