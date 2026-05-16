@@ -172,6 +172,29 @@ header {
 
 #save-daily-btn:active { transform: scale(0.95); }
 
+.btn-primary-large {
+    width: 100%;
+    background: linear-gradient(135deg, var(--primary) 0%, #0ea5e9 100%);
+    color: white;
+    border: none;
+    padding: 16px;
+    border-radius: 16px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 10px 15px -3px rgba(56, 189, 248, 0.2);
+    transition: all 0.3s ease;
+}
+
+.btn-primary-large:active {
+    transform: scale(0.98);
+    box-shadow: 0 5px 10px -3px rgba(56, 189, 248, 0.2);
+}
+
 /* Log Items */
 .log-item { background: var(--card-bg); border-radius: 18px; padding: 16px; margin-bottom: 12px; border: 1px solid var(--border); }
 
