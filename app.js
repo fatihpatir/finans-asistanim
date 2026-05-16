@@ -251,27 +251,38 @@ function setupPortfolio() {
 
     inputs.forEach(id => {
         document.getElementById(id).addEventListener('input', () => {
-            updatePortfolioData();
+            // Sadece görsel olarak anlık hesapla, ama kaydetme
             calculatePortfolio();
         });
     });
 
-    calculatePortfolio();
+    const savePortBtn = document.getElementById('save-portfolio-btn');
+    if (savePortBtn) {
+        savePortBtn.onclick = () => {
+            updatePortfolioData();
+            calculatePortfolio();
+            savePortBtn.innerHTML = '<i class="ph-fill ph-check-circle"></i> Başarıyla Kaydedildi';
+            setTimeout(() => {
+                savePortBtn.innerHTML = '<i class="ph-fill ph-floppy-disk"></i> Portföyü Kaydet ve Hesapla';
+            }, 2000);
+        };
+    }
 
     const fetchBtn = document.getElementById('fetch-prices-btn');
     if (fetchBtn) {
         fetchBtn.addEventListener('click', fetchPrices);
     }
+
+    calculatePortfolio();
 }
 
 async function fetchPrices() {
     const btn = document.getElementById('fetch-prices-btn');
     const originalHTML = btn.innerHTML;
-    btn.innerHTML = '<i class="ph ph-circle-notch ph-spin"></i> Güncelleniyor...';
+    btn.innerHTML = '<i class="ph ph-circle-notch ph-spin"></i> Veriler Çekiliyor...';
     btn.disabled = true;
 
     try {
-        // Yahoo Finance API (BIST hisseleri için .IS uzantısı kullanılır)
         const symbols = ['BFREN.IS', 'TARKM.IS'];
         const proxy = "https://api.allorigins.win/get?url=";
         
@@ -279,6 +290,7 @@ async function fetchPrices() {
         for (const symbol of symbols) {
             const url = encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1m&range=1d`);
             const response = await fetch(`${proxy}${url}`);
+            if (!response.ok) throw new Error("Ağ hatası");
             const data = await response.json();
             const contents = JSON.parse(data.contents);
             const price = contents.chart.result[0].meta.regularMarketPrice;
@@ -290,32 +302,31 @@ async function fetchPrices() {
             }
         }
 
-        // Fon Güncelleme (YK2 - Yapı Kredi Para Piyasası Fonu)
-        // Not: Fon verileri için Yahoo kısıtlıdır, örnek bir kaynaktan çekmeyi deniyoruz.
-        // Eğer fon çekilemezse mevcut değer kalır.
+        // Fon (YK2) - Daha basit bir kaynaktan deneyelim
         try {
-            const fonUrl = encodeURIComponent(`https://fiyatlar.org/fonlar/yk2`);
+            // YK2 fiyatı için örnek bir alternatif
+            const fonUrl = encodeURIComponent(`https://www.tefas.gov.tr/FonAnaliz.aspx?FonKod=YK2`);
             const fonRes = await fetch(`${proxy}${fonUrl}`);
             const fonData = await fonRes.json();
-            // Basit bir regex ile fiyatı ayıklıyoruz (Scraping)
-            const match = fonData.contents.match(/<span class="fiyat">([0-9,.]+)<\/span>/);
+            // TEFAS sayfasından fiyatı yakalamaya çalış
+            const match = fonData.contents.match(/<span>([0-9]+,[0-9]+)<\/span>/);
             if (match) {
                 const fonPrice = parseFloat(match[1].replace(',', '.'));
                 document.getElementById('p-fon-price').value = fonPrice;
             }
-        } catch (e) { console.log("Fon fiyatı çekilemedi, eski değer korunuyor."); }
+        } catch (e) { console.warn("Fon fiyatı atlandı."); }
 
         updatePortfolioData();
         calculatePortfolio();
         
-        btn.innerHTML = '<i class="ph ph-check"></i> Güncellendi';
-        setTimeout(() => { btn.innerHTML = originalHTML; btn.disabled = false; }, 2000);
+        btn.innerHTML = '<i class="ph ph-check-circle"></i> Fiyatlar Güncellendi';
+        setTimeout(() => { btn.innerHTML = originalHTML; btn.disabled = false; }, 3000);
 
     } catch (error) {
-        console.error("Fiyat çekme hatası:", error);
-        btn.innerHTML = '<i class="ph ph-warning"></i> Hata Oluştu';
-        setTimeout(() => { btn.innerHTML = originalHTML; btn.disabled = false; }, 2000);
-        alert("Fiyatlar otomatik çekilemedi. Lütfen manuel giriniz veya internetinizi kontrol edin.");
+        console.error("Hata:", error);
+        btn.innerHTML = '<i class="ph ph-warning"></i> Bağlantı Hatası';
+        setTimeout(() => { btn.innerHTML = originalHTML; btn.disabled = false; }, 3000);
+        alert("Fiyatlar çekilemedi. GitHub Pages bazen bu istekleri engelleyebilir. Lütfen manuel girip 'Portföyü Kaydet' butonuna basın.");
     }
 }
 
