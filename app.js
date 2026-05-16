@@ -1,0 +1,210 @@
+const storage = {
+    get: (key, fallback) => {
+        const item = localStorage.getItem(key);
+        return item ? JSON.parse(item) : fallback;
+    },
+    set: (key, value) => {
+        localStorage.setItem(key, JSON.stringify(value));
+    }
+};
+
+// --- State ---
+let journal = storage.get('finans_v3_journal', []);
+let portfolio = storage.get('finans_v3_portfolio', {
+    fon: { lot: 0, cost: 0, price: 0 },
+    bfren: { lot: 0, cost: 0, price: 0 }
+});
+
+// Varsayılan günlük hedef %0.10
+let TARGET_DAILY_RATE = storage.get('finans_v3_target_rate', 0.10);
+
+// --- Init ---
+function init() {
+    setupNavigation();
+    setupJournal();
+    setupPortfolio();
+    
+    // Set default values
+    document.getElementById('daily-date-input').value = new Date().toISOString().split('T')[0];
+    document.getElementById('target-rate-input').value = TARGET_DAILY_RATE;
+    
+    renderJournal();
+}
+
+function setupNavigation() {
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const tab = item.getAttribute('data-tab');
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+            
+            document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+            document.getElementById(`${tab}-page`).classList.remove('hidden');
+        });
+    });
+}
+
+// --- Journal Logic ---
+function setupJournal() {
+    const saveBtn = document.getElementById('save-daily-btn');
+    const targetInput = document.getElementById('target-rate-input');
+
+    saveBtn.addEventListener('click', () => {
+        const val = parseFloat(document.getElementById('daily-total-input').value);
+        const date = document.getElementById('daily-date-input').value;
+
+        if (!val || !date) return alert("Lütfen miktar ve tarih girin.");
+
+        const entry = { date, value: val };
+        
+        const existing = journal.findIndex(j => j.date === date);
+        if (existing > -1) journal[existing] = entry;
+        else journal.unshift(entry);
+
+        journal.sort((a, b) => new Date(b.date) - new Date(a.date));
+        storage.set('finans_v3_journal', journal);
+        
+        renderJournal();
+        document.getElementById('daily-total-input').value = '';
+    });
+
+    targetInput.addEventListener('input', () => {
+        TARGET_DAILY_RATE = parseFloat(targetInput.value) || 0;
+        storage.set('finans_v3_target_rate', TARGET_DAILY_RATE);
+        renderJournal(); // Re-render with new target
+    });
+
+    document.getElementById('global-reset-btn').onclick = () => {
+        if (confirm("TÜM veriler silinecek. Emin misiniz?")) {
+            localStorage.clear();
+            location.reload();
+        }
+    };
+}
+
+function renderJournal() {
+    const list = document.getElementById('journal-list');
+    const summaryContainer = document.getElementById('monthly-summary-container');
+    list.innerHTML = '';
+    summaryContainer.innerHTML = '';
+
+    if (journal.length === 0) return;
+
+    // Monthly Summary Check
+    const now = new Date();
+    const firstOfCurrent = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastMonthEntries = journal.filter(j => {
+        const d = new Date(j.date);
+        return d.getMonth() === (now.getMonth() - 1 === -1 ? 11 : now.getMonth() - 1);
+    });
+
+    if (lastMonthEntries.length >= 2) {
+        const first = lastMonthEntries[lastMonthEntries.length - 1].value;
+        const last = lastMonthEntries[0].value;
+        const profit = last - first;
+        summaryContainer.innerHTML = `
+            <div class="monthly-summary">
+                <h4>Geçen Ayın Özeti</h4>
+                <p>${formatCurrency(profit)} Kâr Ettiniz</p>
+            </div>
+        `;
+    }
+
+    journal.forEach((entry, index) => {
+        let diffHTML = '';
+        let targetHTML = '';
+
+        if (index < journal.length - 1) {
+            const prev = journal[index + 1].value;
+            const diff = entry.value - prev;
+            const isGain = diff >= 0;
+
+            // Günlük hedef hesaplama (Kullanıcının girdiği % üzerinden)
+            const targetGain = prev * (TARGET_DAILY_RATE / 100);
+            const isAboveTarget = diff >= targetGain;
+            const percentDiff = ((diff / prev) * 100).toFixed(2);
+
+            diffHTML = `<div class="diff-box ${isGain ? 'gain' : 'loss'}">${isGain ? '+' : ''}${formatCurrency(diff)} (${isGain ? '+' : ''}${percentDiff}%)</div>`;
+            
+            targetHTML = `
+                <div class="target-box ${isAboveTarget ? 'success' : 'fail'}">
+                    Hedef: ${formatCurrency(targetGain)} | Durum: <span class="status">${isAboveTarget ? 'BAŞARILI' : 'DÜŞÜK'}</span>
+                </div>
+            `;
+        }
+
+        const div = document.createElement('div');
+        div.className = 'log-item';
+        div.innerHTML = `
+            <div class="log-main">
+                <span class="log-date">${formatDate(entry.date)}</span>
+                <span class="log-val">${formatCurrency(entry.value)}</span>
+            </div>
+            <div class="log-stats">
+                ${diffHTML}
+                ${targetHTML}
+            </div>
+        `;
+        list.appendChild(div);
+    });
+}
+
+// --- Portfolio Logic ---
+function setupPortfolio() {
+    const inputs = ['p-fon-lot', 'p-fon-cost', 'p-fon-price', 'p-bfren-lot', 'p-bfren-cost', 'p-bfren-price'];
+    
+    // Load saved
+    document.getElementById('p-fon-lot').value = portfolio.fon.lot || '';
+    document.getElementById('p-fon-cost').value = portfolio.fon.cost || '';
+    document.getElementById('p-fon-price').value = portfolio.fon.price || '';
+    document.getElementById('p-bfren-lot').value = portfolio.bfren.lot || '';
+    document.getElementById('p-bfren-cost').value = portfolio.bfren.cost || '';
+    document.getElementById('p-bfren-price').value = portfolio.bfren.price || '';
+
+    inputs.forEach(id => {
+        document.getElementById(id).addEventListener('input', () => {
+            updatePortfolioData();
+            calculatePortfolio();
+        });
+    });
+
+    calculatePortfolio();
+}
+
+function updatePortfolioData() {
+    portfolio = {
+        fon: {
+            lot: parseFloat(document.getElementById('p-fon-lot').value) || 0,
+            cost: parseFloat(document.getElementById('p-fon-cost').value) || 0,
+            price: parseFloat(document.getElementById('p-fon-price').value) || 0
+        },
+        bfren: {
+            lot: parseFloat(document.getElementById('p-bfren-lot').value) || 0,
+            cost: parseFloat(document.getElementById('p-bfren-cost').value) || 0,
+            price: parseFloat(document.getElementById('p-bfren-price').value) || 0
+        }
+    };
+    storage.set('finans_v3_portfolio', portfolio);
+}
+
+function calculatePortfolio() {
+    const fonVal = portfolio.fon.lot * portfolio.fon.price;
+    const bfrenVal = portfolio.bfren.lot * portfolio.bfren.price;
+    const total = fonVal + bfrenVal;
+
+    document.getElementById('p-fon-value').innerText = formatCurrency(fonVal);
+    document.getElementById('p-bfren-value').innerText = formatCurrency(bfrenVal);
+    document.getElementById('p-total-value').innerText = formatCurrency(total);
+}
+
+// --- Helpers ---
+function formatCurrency(val) {
+    return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(val);
+}
+
+function formatDate(dateStr) {
+    const options = { day: 'numeric', month: 'short', weekday: 'short' };
+    return new Date(dateStr).toLocaleDateString('tr-TR', options);
+}
+
+init();

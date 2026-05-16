@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Finans Günlüğüm</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body class="dark-theme">
+    <div id="app">
+        
+        <!-- Tab Navigation -->
+        <nav class="top-nav">
+            <button class="nav-item active" data-tab="journal">Günlük Defter</button>
+            <button class="nav-item" data-tab="portfolio">Portföy Detayı</button>
+        </nav>
+
+        <!-- Page 1: Daily Journal -->
+        <div id="journal-page" class="page">
+            <div class="quick-add-card">
+                <div class="card-header-flex">
+                    <h3>Bugünkü Toplam Bakiye</h3>
+                    <div class="target-setting">
+                        <label>Aylık Hedef %</label>
+                        <input type="number" id="target-rate-input" value="10" step="0.1">
+                    </div>
+                </div>
+                <div class="input-row-minimal">
+                    <input type="number" id="daily-total-input" placeholder="₺0.00" step="any">
+                    <input type="date" id="daily-date-input">
+                    <button id="save-daily-btn"><i class="ph-fill ph-check-circle"></i></button>
+                </div>
+            </div>
+
+            <div id="monthly-summary-container"></div>
+
+            <div id="journal-list">
+                <!-- Daily logs with diff and target comparisons -->
+            </div>
+        </div>
+
+        <!-- Page 2: Portfolio Details -->
+        <div id="portfolio-page" class="page hidden">
+            <div class="card portfolio-card">
+                <h3><i class="ph ph-coins"></i> Para Piyasası Fonu</h3>
+                <div class="port-grid">
+                    <div class="field">
+                        <label>Adet (Lot)</label>
+                        <input type="number" id="p-fon-lot" class="port-input" placeholder="0">
+                    </div>
+                    <div class="field">
+                        <label>Maliyet</label>
+                        <input type="number" id="p-fon-cost" class="port-input" placeholder="0.00">
+                    </div>
+                    <div class="field">
+                        <label>Güncel Fiyat</label>
+                        <input type="number" id="p-fon-price" class="port-input" placeholder="0.00">
+                    </div>
+                    <div class="field">
+                        <label>Değer</label>
+                        <span id="p-fon-value" class="calc-val">₺0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card portfolio-card">
+                <h3><i class="ph ph-chart-line-up"></i> BFREN Hisse</h3>
+                <div class="port-grid">
+                    <div class="field">
+                        <label>Adet (Lot)</label>
+                        <input type="number" id="p-bfren-lot" class="port-input" placeholder="0">
+                    </div>
+                    <div class="field">
+                        <label>Maliyet</label>
+                        <input type="number" id="p-bfren-cost" class="port-input" placeholder="0.00">
+                    </div>
+                    <div class="field">
+                        <label>Güncel Fiyat</label>
+                        <input type="number" id="p-bfren-price" class="port-input" placeholder="0.00">
+                    </div>
+                    <div class="field">
+                        <label>Değer</label>
+                        <span id="p-bfren-value" class="calc-val">₺0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="total-calc-box">
+                <span>Hesaplanan Toplam:</span>
+                <strong id="p-total-value">₺0.00</strong>
+            </div>
+            
+            <p style="font-size:11px; color:var(--text-muted); text-align:center; margin-top:10px">
+                * Buradaki bilgiler sadece referans içindir, günlük defteri etkilemez.
+            </p>
+        </div>
+
+        <button id="global-reset-btn">Verileri Sıfırla</button>
+
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
