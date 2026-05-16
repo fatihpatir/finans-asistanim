@@ -248,7 +248,10 @@ header {
 .port-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .field label { display: block; font-size: 10px; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; }
 .port-input { width: 100%; background: #0f172a; border: 1px solid var(--border); padding: 10px; border-radius: 8px; color: white; font-family: inherit; font-size: 14px; }
-.calc-val { font-size: 14px; font-weight: 700; color: var(--success); display: block; margin-top: 5px; }
+.calc-val { font-size: 14px; font-weight: 700; color: var(--primary); display: block; margin-top: 5px; }
+.pl-val { font-size: 13px; font-weight: 600; display: block; margin-top: 5px; }
+.pl-val.gain { color: var(--success); }
+.pl-val.loss { color: var(--danger); }
 .total-calc-box { background: rgba(56, 189, 248, 0.1); padding: 20px; border-radius: 15px; text-align: center; margin-top: 20px; }
 .total-calc-box span { font-size: 14px; color: var(--text-muted); }
 .total-calc-box strong { font-size: 24px; color: var(--primary); display: block; }

@@ -407,18 +407,42 @@ function updatePortfolioData() {
 function calculatePortfolio() {
     try {
         const fonVal = (portfolio.fon.lot || 0) * (portfolio.fon.price || 0);
+        
+        // BFREN Hesaplama
+        const bfrenCostTotal = (portfolio.bfren.lot || 0) * (portfolio.bfren.cost || 0);
         const bfrenVal = (portfolio.bfren.lot || 0) * (portfolio.bfren.price || 0);
+        const bfrenPL = bfrenVal - bfrenCostTotal;
+        const bfrenPLPerc = bfrenCostTotal > 0 ? (bfrenPL / bfrenCostTotal) * 100 : 0;
+
+        // TARKIM Hesaplama
+        const tarkimCostTotal = (portfolio.tarkim.lot || 0) * (portfolio.tarkim.cost || 0);
         const tarkimVal = (portfolio.tarkim.lot || 0) * (portfolio.tarkim.price || 0);
+        const tarkimPL = tarkimVal - tarkimCostTotal;
+        const tarkimPLPerc = tarkimCostTotal > 0 ? (tarkimPL / tarkimCostTotal) * 100 : 0;
+
         const total = fonVal + bfrenVal + tarkimVal;
 
         const fonElem = document.getElementById('p-fon-value');
         const bfrenElem = document.getElementById('p-bfren-value');
+        const bfrenPLElem = document.getElementById('p-bfren-pl');
         const tarkimElem = document.getElementById('p-tarkim-value');
+        const tarkimPLElem = document.getElementById('p-tarkim-pl');
         const totalElem = document.getElementById('p-total-value');
 
         if (fonElem) fonElem.innerText = formatCurrency(fonVal);
+        
         if (bfrenElem) bfrenElem.innerText = formatCurrency(bfrenVal);
+        if (bfrenPLElem) {
+            bfrenPLElem.innerText = `${formatCurrency(bfrenPL)} (%${bfrenPLPerc.toFixed(2)})`;
+            bfrenPLElem.className = `pl-val ${bfrenPL >= 0 ? 'gain' : 'loss'}`;
+        }
+
         if (tarkimElem) tarkimElem.innerText = formatCurrency(tarkimVal);
+        if (tarkimPLElem) {
+            tarkimPLElem.innerText = `${formatCurrency(tarkimPL)} (%${tarkimPLPerc.toFixed(2)})`;
+            tarkimPLElem.className = `pl-val ${tarkimPL >= 0 ? 'gain' : 'loss'}`;
+        }
+
         if (totalElem) totalElem.innerText = formatCurrency(total);
     } catch (e) {
         console.error("Hesaplama hatası:", e);
