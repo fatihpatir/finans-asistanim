@@ -440,13 +440,14 @@ function setupPortfolio() {
             updatePortfolioData();
             const totalVal = calculatePortfolio();
             
-            // Günlük deftere otomatik ekle
+            // Günlük deftere otomatik ekle (sadece fon değeri)
+            const fonVal = (portfolio.fon.lot || 0) * (portfolio.fon.price || 0);
             const today = new Date().toISOString().split('T')[0];
             const existingIdx = journal.findIndex(j => j.date === today);
             
             const entry = {
                 date: today,
-                value: totalVal,
+                value: fonVal,
                 deposit: existingIdx > -1 ? journal[existingIdx].deposit : 0,
                 added: existingIdx > -1 ? journal[existingIdx].added : 0,
                 withdrawn: existingIdx > -1 ? journal[existingIdx].withdrawn : 0
