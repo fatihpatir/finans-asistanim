@@ -434,6 +434,7 @@ function setupPortfolio() {
         });
     });
 
+    const savePortBtn = document.getElementById('save-portfolio-btn');
     if (savePortBtn) {
         savePortBtn.onclick = () => {
             updatePortfolioData();
